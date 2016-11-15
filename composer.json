@@ -1,0 +1,23 @@
+{
+    "name": "naitsirch/pideph-html-renderer",
+    "type": "library",
+    "description": "HTML Rendering Engine written in PHP.",
+    "keywords": ["php", "html", "rendering", "layout", "pideph"],
+    "homepage": "https://github.com/naitsirch/pideph-html-renderer",
+    "license": "MIT",
+    "authors": [
+        { "name": "naitsirch", "email": "naitsirch@e.mail.de" }
+    ],
+    "require": {
+        "php": ">=5.3.8"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pideph\\HtmlRenderer\\" : "src/",
+            "Pideph\\HtmlRenderer\\Tests\\" : "tests/"
+        }
+    }
+}
