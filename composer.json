@@ -9,7 +9,9 @@
         { "name": "naitsirch", "email": "naitsirch@e.mail.de" }
     ],
     "require": {
-        "php": ">=5.3.8"
+        "php": ">=5.3.8",
+        "sabberworm/php-css-parser": "*",
+        "symfony/css-selector": "~3.2"
     },
     "require-dev": {
         "phpunit/phpunit": "~5.5"
