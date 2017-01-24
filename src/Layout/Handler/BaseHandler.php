@@ -3,6 +3,7 @@
 namespace Pideph\HtmlRenderer\Layout\Handler;
 
 use Pideph\HtmlRenderer\Layout\Element;
+use Pideph\HtmlRenderer\Css\Values\BorderStyle;
 use Pideph\HtmlRenderer\Css\Values\Length;
 
 /**
@@ -33,18 +34,45 @@ class BaseHandler implements PreLayoutHandlerInterface, PostLayoutHandlerInterfa
     }
 
     /**
+     * Takes a shorthand value for 1..4 sides and prepares them as array.
+     * Example: "1px 2px 3px 4px" => [1px, 2px, 3px, 4px]
+     *
+     * @param string $shorthandValue
+     * @return array
+     */
+    public static function explodeFourSidesShorthandValue($shorthandValue)
+    {
+        $values = explode(' ', trim($shorthandValue));
+
+        if (count($values) === 1) {
+            $values[1] = $values[2] = $values[3] = $values[0];
+        } else if (count($values) === 2) {
+            $values[2] = $values[3] = $values[1];
+            $values[1] = $values[0];
+        }
+
+        return $values;
+    }
+
+    /**
      * Documentation:
      * https://developer.mozilla.org/en-US/docs/Web/CSS/border
      * https://developer.mozilla.org/en-US/docs/Web/CSS/border-width
+     * https://developer.mozilla.org/en-US/docs/Web/CSS/border-style
+     * https://developer.mozilla.org/en-US/docs/Web/CSS/border-color
      *
      * @param Element $element
      */
     private function assignBorderDefinition(Element $element)
     {
+        /**
+         * border shorthand property
+         */
         if (isset($element->styleRules['border'])) {
             $width = null;
+            $style = null;
             foreach (explode(' ', trim($element->styleRules['border'])) as $value) {
-                if (in_array($value, array('thin', 'medium', 'thick'))) {
+                if (in_array($value, ['thin', 'medium', 'thick'], true)) {
                     // @TODO: This should be made context dependent from layout (unit and resolution)
                     switch ($value) {
                         case 'thin':   $width = new Length(1, 'px'); break;
@@ -53,6 +81,8 @@ class BaseHandler implements PreLayoutHandlerInterface, PostLayoutHandlerInterfa
                     }
                 } else if ($length = Length::parseIfValid($value)) {
                     $width = $length;
+                } else if (BorderStyle::isValid($value)) {
+                    $style = $value;
                 }
             }
 
@@ -62,17 +92,21 @@ class BaseHandler implements PreLayoutHandlerInterface, PostLayoutHandlerInterfa
                 $element->computedValues['border-bottom-width'] =
                 $element->computedValues['border-left-width']   = $width;
             }
+
+            if ($style) {
+                $element->computedValues['border-top-style']    =
+                $element->computedValues['border-right-style']  =
+                $element->computedValues['border-bottom-style'] =
+                $element->computedValues['border-left-style']   = $style;
+            }
         }
 
-        if (isset($element->styleRules['border-width'])) {
-            $widths = explode(' ', trim($element->styleRules['border-width']));
+        /**
+         * border width
+         */
 
-            if (count($widths) === 1) {
-                $widths[1] = $widths[2] = $widths[3] = $widths[0];
-            } else if (count($widths) === 2) {
-                $widths[2] = $widths[3] = $widths[1];
-                $widths[1] = $widths[0];
-            }
+        if (isset($element->styleRules['border-width'])) {
+            $widths = self::explodeFourSidesShorthandValue($element->styleRules['border-width']);
 
             $element->computedValues['border-top-width']    = Length::parse($widths[0]);
             $element->computedValues['border-right-width']  = Length::parse($widths[1]);
@@ -94,6 +128,35 @@ class BaseHandler implements PreLayoutHandlerInterface, PostLayoutHandlerInterfa
         }
         if ($element->styleRules['border-left-width']) {
             $element->computedValues['border-left-width'] = Length::parse($element->styleRules['border-left-width']);
+        }
+
+        /**
+         * border style
+         */
+
+        if (isset($element->styleRules['border-style'])) {
+            $styles = self::explodeFourSidesShorthandValue($element->styleRules['border-style']);
+
+            $element->computedValues['border-top-style']    = $styles[0];
+            $element->computedValues['border-right-style']  = $styles[1];
+            $element->computedValues['border-bottom-style'] = $styles[2];
+
+            if (isset($styles[3])) {
+                $element->computedValues['border-left-style'] = $styles[3];
+            }
+        }
+
+        if ($element->styleRules['border-top-style']) {
+            $element->computedValues['border-top-style'] = $element->styleRules['border-top-style'];
+        }
+        if ($element->styleRules['border-right-style']) {
+            $element->computedValues['border-right-style'] = $element->styleRules['border-right-style'];
+        }
+        if ($element->styleRules['border-bottom-style']) {
+            $element->computedValues['border-bottom-style'] = $element->styleRules['border-bottom-style'];
+        }
+        if ($element->styleRules['border-left-style']) {
+            $element->computedValues['border-left-style'] = $element->styleRules['border-left-style'];
         }
     }
 }
