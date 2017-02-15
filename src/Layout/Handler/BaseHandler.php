@@ -4,6 +4,7 @@ namespace Pideph\HtmlRenderer\Layout\Handler;
 
 use Pideph\HtmlRenderer\Layout\Element;
 use Pideph\HtmlRenderer\Css\Values\BorderStyle;
+use Pideph\HtmlRenderer\Css\Values\Color;
 use Pideph\HtmlRenderer\Css\Values\Length;
 
 /**
@@ -69,6 +70,7 @@ class BaseHandler implements PreLayoutHandlerInterface, PostLayoutHandlerInterfa
          * border shorthand property
          */
         if (isset($element->styleRules['border'])) {
+            $color = null;
             $width = null;
             $style = null;
             foreach (explode(' ', trim($element->styleRules['border'])) as $value) {
@@ -79,11 +81,20 @@ class BaseHandler implements PreLayoutHandlerInterface, PostLayoutHandlerInterfa
                         case 'medium': $width = new Length(3, 'px'); break;
                         case 'thick':  $width = new Length(5, 'px'); break;
                     }
+                } else if ($isColor = Color::parseIfValid($value)) {
+                    $color = $isColor;
                 } else if ($length = Length::parseIfValid($value)) {
                     $width = $length;
                 } else if (BorderStyle::isValid($value)) {
                     $style = $value;
                 }
+            }
+
+            if ($color) {
+                $element->computedValues['border-top-color']    =
+                $element->computedValues['border-right-color']  =
+                $element->computedValues['border-bottom-color'] =
+                $element->computedValues['border-left-color']   = $color;
             }
 
             if ($width) {
@@ -102,32 +113,61 @@ class BaseHandler implements PreLayoutHandlerInterface, PostLayoutHandlerInterfa
         }
 
         /**
+         * border color
+         */
+
+        if (isset($element->styleRules['border-color'])) {
+            $colors = self::explodeFourSidesShorthandValue($element->styleRules['border-color']);
+
+            $element->computedValues['border-top-color']    = new Color($colors[0]);
+            $element->computedValues['border-right-color']  = new Color($colors[1]);
+            $element->computedValues['border-bottom-color'] = new Color($colors[2]);
+
+            if (isset($colors[3])) {
+                $element->computedValues['border-left-color'] = new Color($colors[3]);
+            }
+        }
+
+        if ($element->styleRules['border-top-color']) {
+            $element->computedValues['border-top-color'] = new Color($element->styleRules['border-top-color']);
+        }
+        if ($element->styleRules['border-right-color']) {
+            $element->computedValues['border-right-color'] = new Color($element->styleRules['border-right-color']);
+        }
+        if ($element->styleRules['border-bottom-color']) {
+            $element->computedValues['border-bottom-color'] = new Color($element->styleRules['border-bottom-color']);
+        }
+        if ($element->styleRules['border-left-color']) {
+            $element->computedValues['border-left-color'] = new Color($element->styleRules['border-left-color']);
+        }
+
+        /**
          * border width
          */
 
         if (isset($element->styleRules['border-width'])) {
             $widths = self::explodeFourSidesShorthandValue($element->styleRules['border-width']);
 
-            $element->computedValues['border-top-width']    = Length::parse($widths[0]);
-            $element->computedValues['border-right-width']  = Length::parse($widths[1]);
-            $element->computedValues['border-bottom-width'] = Length::parse($widths[2]);
+            $element->computedValues['border-top-width']    = new Length($widths[0]);
+            $element->computedValues['border-right-width']  = new Length($widths[1]);
+            $element->computedValues['border-bottom-width'] = new Length($widths[2]);
 
             if (isset($widths[3])) {
-                $element->computedValues['border-left-width'] = Length::parse($widths[3]);
+                $element->computedValues['border-left-width'] = new Length($widths[3]);
             }
         }
 
         if ($element->styleRules['border-top-width']) {
-            $element->computedValues['border-top-width'] = Length::parse($element->styleRules['border-top-width']);
+            $element->computedValues['border-top-width'] = new Length($element->styleRules['border-top-width']);
         }
         if ($element->styleRules['border-right-width']) {
-            $element->computedValues['border-right-width'] = Length::parse($element->styleRules['border-right-width']);
+            $element->computedValues['border-right-width'] = new Length($element->styleRules['border-right-width']);
         }
         if ($element->styleRules['border-bottom-width']) {
-            $element->computedValues['border-bottom-width'] = Length::parse($element->styleRules['border-bottom-width']);
+            $element->computedValues['border-bottom-width'] = new Length($element->styleRules['border-bottom-width']);
         }
         if ($element->styleRules['border-left-width']) {
-            $element->computedValues['border-left-width'] = Length::parse($element->styleRules['border-left-width']);
+            $element->computedValues['border-left-width'] = new Length($element->styleRules['border-left-width']);
         }
 
         /**

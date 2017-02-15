@@ -15,38 +15,44 @@ class Length
 
     public $unit;
 
-    public function __construct($value, $unit)
+    public function __construct($length)
     {
-        $this->value = $value;
-        $this->unit = $unit;
+        $parsed = self::parse($length);
+
+        $this->value = $parsed[0];
+        $this->unit = $parsed[1];
+    }
+
+    public function __toString()
+    {
+        return $this->value . $this->unit;
     }
 
     /**
-     * Parse a length value.
+     * Parses the given string and returns an instance of Length if it is valid - otherwise FALSE.
      *
      * @param string $string
-     * @return Length
-     * @throws \InvalidArgumentException If $string is not a valid length.
+     * @return Length|boolean
      */
-    public static function parse($string)
-    {
-        $parsed = self::_parse($string);
-        return new self($parsed[0], $parsed[1]);
-    }
-
     public static function parseIfValid($string)
     {
         try {
-            return self::parse($string);
+            return new self($string);
         } catch (\InvalidArgumentException $e) {
             return false;
         }
     }
 
+    /**
+     * Check if the given string is a valid length value.
+     *
+     * @param string $string
+     * @return boolean
+     */
     public static function isValid($string)
     {
         try {
-            self::_parse($string);
+            self::parse($string);
             return true;
         } catch (\InvalidArgumentException $e) {
             return false;
@@ -58,7 +64,7 @@ class Length
      * @return array
      * @throws \InvalidArgumentException If $string is not a valid length.
      */
-    private static function _parse($string)
+    private static function parse($string)
     {
         $value = '';
         $unit = '';
