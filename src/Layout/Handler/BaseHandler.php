@@ -26,7 +26,10 @@ class BaseHandler implements PreLayoutHandlerInterface, PostLayoutHandlerInterfa
 
     public function handlePreLayout(Element $element)
     {
-        $this->assignBorderDefinition($element);
+        $this->assignBorderDefinitions($element);
+        $this->assignMarginDefinitions($element);
+        $this->assignPaddingDefinitions($element);
+        $this->assignTextDefinitions($element);
     }
 
     public function handlePostLayout(Element $element)
@@ -64,7 +67,7 @@ class BaseHandler implements PreLayoutHandlerInterface, PostLayoutHandlerInterfa
      *
      * @param Element $element
      */
-    private function assignBorderDefinition(Element $element)
+    private function assignBorderDefinitions(Element $element)
     {
         /**
          * border shorthand property
@@ -198,5 +201,100 @@ class BaseHandler implements PreLayoutHandlerInterface, PostLayoutHandlerInterfa
         if ($element->styleRules['border-left-style']) {
             $element->computedValues['border-left-style'] = $element->styleRules['border-left-style'];
         }
+
+        /**
+         * border radius
+         */
+
+        if (isset($element->styleRules['border-radius'])) {
+            $radii = self::explodeFourSidesShorthandValue($element->styleRules['border-radius']);
+
+            $element->computedValues['border-top-left-radius']    = $radii[0];
+            $element->computedValues['border-top-right-radius']  = $radii[1];
+            $element->computedValues['border-bottom-right-radius'] = $radii[2];
+
+            if (isset($radii[3])) {
+                $element->computedValues['border-bottom-left-radius'] = $radii[3];
+            }
+        }
+
+        if ($element->styleRules['border-top-left-radius']) {
+            $element->computedValues['border-top-left-radius'] = $element->styleRules['border-top-left-radius'];
+        }
+        if ($element->styleRules['border-top-right-radius']) {
+            $element->computedValues['border-top-right-radius'] = $element->styleRules['border-top-right-radius'];
+        }
+        if ($element->styleRules['border-bottom-right-radius']) {
+            $element->computedValues['border-bottom-right-radius'] = $element->styleRules['border-bottom-right-radius'];
+        }
+        if ($element->styleRules['border-bottom-left-radius']) {
+            $element->computedValues['border-bottom-left-radius'] = $element->styleRules['border-bottom-left-radius'];
+        }
+    }
+
+    /**
+     * @param Element $element
+     */
+    private function assignMarginDefinitions(Element $element)
+    {
+        if (isset($element->styleRules['margin'])) {
+            $margins = self::explodeFourSidesShorthandValue($element->styleRules['margin']);
+
+            $element->computedValues['margin-top']    = new Length($margins[0]);
+            $element->computedValues['margin-right']  = new Length($margins[1]);
+            $element->computedValues['margin-bottom'] = new Length($margins[2]);
+
+            if (isset($margins[3])) {
+                $element->computedValues['margin-left'] = new Length($margins[3]);
+            }
+        }
+
+        if ($element->styleRules['margin-top']) {
+            $element->computedValues['margin-top'] = new Length($element->styleRules['margin-top']);
+        }
+        if ($element->styleRules['margin-right']) {
+            $element->computedValues['margin-right'] = new Length($element->styleRules['margin-right']);
+        }
+        if ($element->styleRules['margin-bottom']) {
+            $element->computedValues['margin-bottom'] = new Length($element->styleRules['margin-bottom']);
+        }
+        if ($element->styleRules['margin-left']) {
+            $element->computedValues['margin-left'] = new Length($element->styleRules['margin-left']);
+        }
+    }
+
+    /**
+     * @param Element $element
+     */
+    private function assignPaddingDefinitions(Element $element)
+    {
+        if (isset($element->styleRules['padding'])) {
+            $paddings = self::explodeFourSidesShorthandValue($element->styleRules['padding']);
+
+            $element->computedValues['padding-top']    = new Length($paddings[0]);
+            $element->computedValues['padding-right']  = new Length($paddings[1]);
+            $element->computedValues['padding-bottom'] = new Length($paddings[2]);
+
+            if (isset($paddings[3])) {
+                $element->computedValues['padding-left'] = new Length($paddings[3]);
+            }
+        }
+
+        if ($element->styleRules['padding-top']) {
+            $element->computedValues['padding-top'] = new Length($element->styleRules['padding-top']);
+        }
+        if ($element->styleRules['padding-right']) {
+            $element->computedValues['padding-right'] = new Length($element->styleRules['padding-right']);
+        }
+        if ($element->styleRules['padding-bottom']) {
+            $element->computedValues['padding-bottom'] = new Length($element->styleRules['padding-bottom']);
+        }
+        if ($element->styleRules['padding-left']) {
+            $element->computedValues['padding-left'] = new Length($element->styleRules['padding-left']);
+        }
+    }
+
+    private function assignTextDefinitions(Element $element)
+    {
     }
 }
